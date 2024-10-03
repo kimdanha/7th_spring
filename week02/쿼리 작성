@@ -56,7 +56,7 @@ SELECT
     m.name AS nickname, -- 닉네임
     m.email AS email, -- 이메일
     CASE
-        WHEN m.social_type IS NOT NULL THEN '인증 완료'
+        WHEN m.phonenum IS NOT NULL THEN '인증 완료'
         ELSE '미인증'
     END AS phonenum_status 
     m.point AS points, -- 포인트 
