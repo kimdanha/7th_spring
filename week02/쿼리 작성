@@ -1,0 +1,64 @@
+//미션
+SELECT mem_m.id AS mission_id,
+			 s.name AS store_name,
+			 m.mission_spec,
+			 m.reward,
+			 mem_m.status,
+			 mem_m. created_at,
+			 mem_m. updated_at,
+			 CASE
+				 WHEN r.id IS NULL THEN '리뷰 남기기' --리뷰 작성을 아직 안 해서 리뷰가 존재하지 않는 경우
+				 ELSE '리뷰 작성 완료'
+			 END AS revies_status
+FROM member_mission mem_m
+JOIN mission m ON mem_mission_id = m.id --member_mission 테이블과 mission 테이블 조인
+JOIN store s ON m.store_id = s.id --mission 테이블과 store 테이블 조인
+LEFT JOIN review r ON r.member_id == mem_m.member_id AND r.store_id = s.id --리뷰가 없는 경우에도 회원의 미션 정보를 계속 가져올 수 있도록 left join
+WHERE mem_m.memberid = 사용자id --특정 회원의 미션정보 조회
+	AND ( 마지막 업데이트 시간 IS NULL OR mem_m.updated_at < 마지막 업데이트 시간)
+ORDER BY mem_m.updated_at DESC
+LIMIT 15;	
+
+// 리뷰작성
+SELECT r.id AS review_id,
+       m.name AS nickname,
+       r.body AS review_body,
+       r.score AS review_score,
+       r.updated_at AS review_updated
+FROM review r
+JOIN member m ON r.member_id = m.id
+WHERE r.store_id = 가게 아이디 -- 특정 가게의 리뷰만 조회 
+ORDER BY r.updated_at DESC;
+
+//홈화면 
+SELECT 
+    s.id AS store_id,
+    s.name AS store_name,      
+    s.category AS store_category,
+    m.mission_spec,            
+    m.reward,                  
+    DATEDIFF(m.deadline, NOW()) AS d_day, --미션의 deadline과 현재 날짜간의 차이를 d_day라는 별칭으로 설정  
+    CASE 
+        WHEN mem_m.status = 'completed' THEN '참여 완료'
+        ELSE '미션 도전!'   
+    END AS mission_status
+FROM store s --특정 지역에 속한 가게들을 기준으로 해당 가게들의미션 정보를 가져오기 위해
+JOIN mission m ON s.id = m.store_id --store테이블의 id와 mission테이블의 store_id가 일치하는 경우 
+LEFT JOIN member_mission mem_m ON mem_m.mission_id = m.id AND mem_m.member_id = 회원 아이디 --조인 조건은 member_mission 테이블의 mission_id가 mission 테이블의 id와 일치하고, member_mission 테이블의 member_id가 특정 회원의 아이디와 일치하는 경우
+WHERE s.region_id = 지역 아이디 --특정 지역의 가게만 조회
+AND m.deadline >= NOW()
+AND (s.id > 마지막으로 조회된 가게 id OR (s.id = 마지막으로 조회된 가게 id AND m.deadline > 마지막으로 조회된 가게의 deadline))
+ORDER BY s.id ASC, d_day ASC
+LIMIT 15;
+
+//마이페이지
+SELECT 
+    m.name AS nickname, -- 닉네임
+    m.email AS email, -- 이메일
+    CASE
+        WHEN m.social_type IS NOT NULL THEN '인증 완료'
+        ELSE '미인증'
+    END AS phonenum_status 
+    m.point AS points, -- 포인트 
+FROM member m
+WHERE m.id = 회원 아이디
