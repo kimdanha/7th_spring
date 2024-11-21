@@ -1,10 +1,14 @@
 package umc.study.service.MissionService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.study.converter.MissionAddConverter;
 import umc.study.domain.Mission;
+import umc.study.domain.Review;
 import umc.study.domain.Store;
 import umc.study.repository.MissionRepository.MissionRepository;
 import umc.study.repository.StoreRepository.StoreRepository;
@@ -39,5 +43,11 @@ public class MissionService {
         // MissionAddResponseDTO 반환
         return MissionAddConverter.toMissionAddResponseDTO(savedMission);
     }
+
+    public Page<Mission> getMissionsByStore(Long storeId, int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        return missionRepository.findByStoreId(storeId, pageable);
+    }
+
 }
 

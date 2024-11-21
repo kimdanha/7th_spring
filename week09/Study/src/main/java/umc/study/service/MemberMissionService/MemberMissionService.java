@@ -1,6 +1,9 @@
 package umc.study.service.MemberMissionService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.study.apiPayload.exception.MissionAlreadyInProgressException;
@@ -41,5 +44,10 @@ public class MemberMissionService {
         return memberMissionRepository.save(memberMission);
     }
 
+    public Page<Mission> getMissionsByMember(Long memberId, int page, int size) {
+        Page<MemberMission> memberMissionPage = memberMissionRepository.findByMemberId(memberId, PageRequest.of(page, size));
+        // MemberMission -> Mission 변환
+        return memberMissionPage.map(MemberMission::getMission);
+    }
 }
 
